@@ -1,4 +1,5 @@
 #include "game.hpp"
+#include <cstdlib>
 
 TinyFootball::TinyFootball() : _lib(new GUI_SDL)
 {
@@ -67,6 +68,7 @@ void TinyFootball::hit_ball(int type)
 					ball.ys *= 0.6;
 				}
 			}
+			std::cout << ball.xs << " " << ball.ys << " \n";
 			ball.x += ball.xs;
 			ball.y += ball.ys;
 		}
@@ -330,6 +332,31 @@ void TinyFootball::behav_bot()
 
 }
 
+void TinyFootball::wind() {
+	piece& ball = _pieces[tball];
+	std::cout << "wind \n";
+	int x = std::rand() % 1001 + 100;
+	int y = std::rand() % 1001 + 100;
+	double hyp = hypot(x - ball.x, y - ball.y);
+	double sin = (x - ball.y) / hyp;
+	double cos = (ball.x - y) / hyp;
+	double nSpeed = ball.xs * cos - ball.ys * sin;
+	double tSpeed = ball.xs * sin + ball.ys * cos;
+	nSpeed = -nSpeed;
+
+	ball.xs = tSpeed * sin + nSpeed * cos + x * 2;
+	ball.ys = tSpeed * cos - nSpeed * sin + y * 2;
+
+	while (pow(MAX_SPEED, 2) < pow(ball.xs, 2) + pow(ball.ys, 2))
+	{
+		ball.xs *= 0.6;
+		ball.ys *= 0.6;
+	}
+	std::cout << ball.xs << " " << ball.ys << " \n";
+	ball.x += ball.xs;
+	ball.y += ball.ys;
+}
+
 void TinyFootball::start()
 {
 	_lib->new_game(_hard);
@@ -337,9 +364,12 @@ void TinyFootball::start()
 	bool quit = false;
 	while (!quit)
 	{
+		
 		SDL_Event e;
 		//movement handler
-		while (!quit) {
+		int count = 1;
+		while (!quit) 
+		{
 			while (SDL_PollEvent(&e) != 0) {
 				//quit
 				if (e.type == SDL_QUIT) {
@@ -347,7 +377,6 @@ void TinyFootball::start()
 					std::cout << "quit \n";
 				}
 			}
-
 			// menu handler
 			_event = _lib->checkEvent();
 			switch (_event)
@@ -791,17 +820,25 @@ void TinyFootball::start()
 				confines(player[1]);
 				_lib->draw(_pieces);
 				behav_ball();
+				if (count % 2000 == 0) 
+				{
+					count = 1;
+					wind();
+				}
 			}
 			else if (_pvc)
 			{
-				behav_bot();
 				confines(player[0]);
 				confines(player[1]);
-
 				_lib->draw(_pieces);
 				behav_ball();
+				if (count % 2000 == 0) 
+				{
+					count = 1;
+					wind();
+				}
 			}
-			
+			count++;
 		}
 	}
 }

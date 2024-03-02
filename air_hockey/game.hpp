@@ -22,6 +22,7 @@ private:
 	void hit_ball(int type);
 	void confines(int type);
 	void extrude();
+	void wind();
 	std::unique_ptr<GUI_SDL> _lib;
 	bool _pvp = false , _hard = false, _pvc = false, _mute = true;
 	Event_en _event;
