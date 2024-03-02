@@ -828,6 +828,7 @@ void TinyFootball::start()
 			}
 			else if (_pvc)
 			{
+				behav_bot();
 				confines(player[0]);
 				confines(player[1]);
 				_lib->draw(_pieces);
